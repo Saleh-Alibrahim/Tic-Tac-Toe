@@ -1,64 +1,85 @@
-const PLAYER_MOVE = 'X', COMPUTER_MOVE = 'O';
-
-const WINNING_COMBINATIONS = [[0, 1, 2], [3, 4, 5], [6, 7, 8],
-[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+const PLAYER_MOVE = 'X';
+const COMPUTER_MOVE = 'O';
 
 const boxList = document.querySelectorAll('.box');
-let gameInPlay = true, winningCombination;
 
+let winningBoxs = [];
 
+let gameOn = true;
 
-function playerTurn({ target: box }) {
-    if (!gameInPlay) return;
-    if (!box.classList.contains('empty')) return;
+const WINNING_MOVES = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [6, 4, 2],
+];
 
-    drawScore(PLAYER_MOVE, box);
+function playerTurn(event) {
+  const box = event.target;
 
-    if (checkWin(PLAYER_MOVE)) {
-        gameInPlay = false;
-        highlightWinnerBoxes(PLAYER_MOVE);
-    }
-    if (gameInPlay && checkDraw()) { gameInPlay = false; alert('Draw'); }
-    if (gameInPlay) { computerTurn(); }
+  if (!gameOn) {
+    return;
+  }
+
+  if (!box.classList.contains('empty')) {
+    return;
+  }
+
+  drawScore(PLAYER_MOVE, box);
+
+  if (checkWin(PLAYER_MOVE)) {
+    highlightWinningBoxs(PLAYER_MOVE);
+  }
+
+  if (gameOn) {
+    computerTurn();
+  }
 }
+
 function computerTurn() {
-    const availableMoves = document.querySelectorAll(".empty");
+  const avilableMoves = document.querySelectorAll('.empty');
 
-    const randomBox = availableMoves[Math.floor(Math.random() * availableMoves.length)];
-    drawScore(COMPUTER_MOVE, randomBox);
-    if (checkWin(COMPUTER_MOVE)) {
-        gameInPlay = false;
-        highlightWinnerBoxes(COMPUTER_MOVE);
-    }
+  const randomBox =
+    avilableMoves[Math.floor(Math.random() * avilableMoves.length)];
 
-}
-function checkWin(currentMove) {
-    return WINNING_COMBINATIONS.some(combination => {
-        winningCombination = combination;
-        return combination.every(index => {
-            return boxList[index].classList.contains(currentMove);
-        })
-    })
-}
-function checkDraw() {
-    const availableMoves = document.querySelectorAll(".empty");
+  drawScore(COMPUTER_MOVE, randomBox);
 
-    return availableMoves.length === 0;
+  if (checkWin(COMPUTER_MOVE)) {
+    highlightWinningBoxs(COMPUTER_MOVE);
+  }
 }
+
 function drawScore(currentMove, box) {
-    box.innerHTML = currentMove;
-    box.classList.add(currentMove);
-    box.classList.remove('empty');
+  box.innerHTML = currentMove;
+  box.classList.add(currentMove);
+  box.classList.remove('empty');
 }
-function highlightWinnerBoxes(currentMove) {
-    const box1 = document.getElementById(`box_${winningCombination[0]}`);
-    const box2 = document.getElementById(`box_${winningCombination[1]}`);
-    const box3 = document.getElementById(`box_${winningCombination[2]}`);
-    box1.classList.add('winning-box');
-    box2.classList.add('winning-box');
-    box3.classList.add('winning-box');
-    alert(currentMove + ' Won !')
+
+function highlightWinningBoxs(currentMove) {
+  winningBoxs.forEach((index) => {
+    boxList[index].classList.add('winning-box');
+  });
+
+  gameOn = false;
+
+  setTimeout(() => {
+    alert(currentMove + ' Won !');
+  }, 0);
 }
-boxList.forEach(box => {
-    box.addEventListener('click', playerTurn)
-})
+
+function checkWin(currentMove) {
+  return WINNING_MOVES.some((moves) => {
+    winningBoxs = moves;
+    return moves.every((index) => {
+      return boxList[index].classList.contains(currentMove);
+    });
+  });
+}
+
+boxList.forEach((box) => {
+  box.addEventListener('click', playerTurn);
+});
